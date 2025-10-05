@@ -19,4 +19,9 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Views\Incomes\" />
+    <Folder Include="Views\Expenses\" />
+  </ItemGroup>
+
 </Project>
