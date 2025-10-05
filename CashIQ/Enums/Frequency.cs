@@ -14,8 +14,8 @@ namespace CashIQ.Enums
 		Monthly,
 		[Display(Name = "Quarterly")]
 		Quarterly,
-		[Display(Name = "Semi-Anually")]
-		SemiAnually,
+		[Display(Name = "Semi-Annually")]
+		SemiAnnually,
 		[Display(Name = "Yearly")]
 		Yearly
 	}
