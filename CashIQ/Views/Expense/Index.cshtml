@@ -1,11 +1,11 @@
-﻿@model IEnumerable<Income>
+﻿@model IEnumerable<Expense>
 @{
-	ViewBag.Title = "Incomes";
+	ViewBag.Title = "Expenses";
 }
 
 @if (Model.Count() > 0)
 {
-	<a asp-action="Create" asp-controller="Income">create an income</a>
+	<a asp-action="Create" asp-controller="Expense">create an expense</a>
 	<table style="width: 100%;">
 		<tr style="width: 100%; background: Lightgrey;">
 			<th>Title</th>
@@ -18,15 +18,15 @@
 		@{
 			bool rowBgColorSwitch = true;
 		}
-		@foreach (Income item in Model)
+		@foreach (Expense item in Model)
 		{
 			<tr style="background: @(rowBgColorSwitch ? "white" : "lightgrey")">
 				<td>@item.Title</td>
 				<td>@item.Description</td>
 				<td>@item.Amount.ToString("C2")</td>
 				<td>@item.Frequency</td>
-				<td><a asp-action="Edit" asp-controller="Income" asp-route-id="@item.Id">Edit</a></td>
-				<td><a asp-action="Delete" asp-controller="Income" asp-route-id="@item.Id">Delete</a></td>
+				<td><a asp-action="Edit" asp-controller="Expense" asp-route-id="@item.Id">Edit</a></td>
+				<td><a asp-action="Delete" asp-controller="Expense" asp-route-id="@item.Id">Delete</a></td>
 			</tr>
 			rowBgColorSwitch = !rowBgColorSwitch;
 		}
@@ -34,5 +34,5 @@
 }
 else
 {
-	<h1>No data, please click <a asp-action="Create" asp-controller="Income">here to create an income</a></h1>
+	<h1>No data, please click <a asp-action="Create" asp-controller="Expense">here to create an expense</a></h1>
 }

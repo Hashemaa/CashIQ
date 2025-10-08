@@ -4,7 +4,6 @@ using CashIQ.Dtos;
 using CashIQ.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Tokens;
 
 namespace CashIQ.Controllers.Api
 {
@@ -53,7 +52,7 @@ namespace CashIQ.Controllers.Api
 
 			var incomeReadDto = _mapper.Map<IncomeReadDto>(income);
 
-			return CreatedAtRoute(nameof(GetIncomeById), new { Id = income.Id }, incomeReadDto); //incomeReadDto.Id <-- future consideration
+			return CreatedAtRoute(nameof(GetIncomeById), new { Id = incomeReadDto.Id }, incomeReadDto);
 		}
 
 		//PUT api/incomes/{id}
@@ -94,12 +93,29 @@ namespace CashIQ.Controllers.Api
 				_mapper.Map(incomeToPatch, incomeFromRepo);
 				//_transactionRepo.UpdateTransaction<Income>(incomeFromRepo);
 				_transactionRepo.SaveChanges();
+
 				return NoContent();
 			}
-			else
-			{
+
 				return NotFound(incomeFromRepo);
+		}
+
+		//DELETE api/incomes/{id}
+		[HttpDelete("{id}")]
+		public ActionResult DeleteIncome(Guid id)
+		{
+			var incomeFromRepo = _transactionRepo.GetTransactionById<Income>(id);
+
+			if (incomeFromRepo != null)
+			{
+				_transactionRepo.DeleteTransaction<Income>(incomeFromRepo);
+				_transactionRepo.SaveChanges();
+
+				return NoContent();
+				
 			}
+
+			return NotFound();
 		}
 	}
 }
