@@ -4,14 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace CashIQ.Controllers
 {
-    public class HomeController : Controller
+    public class DashboardController(ILogger<DashboardController> logger) : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-
-        public HomeController(ILogger<HomeController> logger)
-        {
-            _logger = logger;
-        }
+        private readonly ILogger<DashboardController> _logger = logger;
 
         public IActionResult Index()
         {

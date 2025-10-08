@@ -25,7 +25,7 @@ namespace CashIQ.Data
 			return _context.Set<T>();
 		}
 
-		public T? GetTransactionById<T>(int id) where T : Transaction
+		public T? GetTransactionById<T>(Guid id) where T : Transaction
 		{
 			return _context.Find<T>(id);
 		}

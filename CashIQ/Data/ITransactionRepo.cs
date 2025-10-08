@@ -10,6 +10,6 @@ namespace CashIQ.Data
 		public IQueryable<T> GetAllTransactions<T>() where T : Transaction;
 		public void UpdateTransaction<T>(T transactionEntity) where T : Transaction;
 		public void DeleteTransaction<T>(T transactionEntity) where T : Transaction;
-		public T? GetTransactionById<T>(int id) where T : Transaction;
+		public T? GetTransactionById<T>(Guid id) where T : Transaction;
 	}
 }

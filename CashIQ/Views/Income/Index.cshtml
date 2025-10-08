@@ -1,0 +1,29 @@
+﻿@model IEnumerable<Income>
+@{
+	ViewBag.Title = "Incomes";
+}
+
+@if(Model.Count() > 0)
+{
+	<table>
+		<tr>
+			<th>Title</th>
+			<th>Description</th>
+			<th>Amount</th>
+			<th>Frequency</th>
+		</tr>
+		@foreach(var item in Model)
+		{
+			<tr>
+				<td>@item.Title</td>
+				<td>@item.Description</td>
+				<td>@item.Amount</td>
+				<td>@item.Frequency</td>
+			</tr>
+		}
+	</table>
+}
+else
+{
+	<h1>Empty list of @nameof(Model)</h1>
+}
