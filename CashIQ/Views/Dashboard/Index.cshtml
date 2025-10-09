@@ -1,7 +1,20 @@
-﻿@{
+﻿@using CashIQ.Enums
+@model DashboardViewModel
+@{
     ViewData["Title"] = "Dashboard";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Net Cashflow: ⬆️ </h1>
+    <form asp-action="Index">
+        <label asp-for="Frequency">Frequency</label>
+        <br />
+        <select asp-for="Frequency" required>
+            @foreach (Frequency freq in Enum.GetValues(typeof(Frequency)))
+            {
+                <option value="@freq">@freq</option>
+            }
+        </select>
+        <button type="submit">submit</button>
+    </form>
+    <h1 class="display-4">Net Cashflow: ⬆️ @Model.CashFlow.ToString("C2")</h1>
 </div>

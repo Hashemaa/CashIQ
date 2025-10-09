@@ -1,27 +1,29 @@
 ﻿using CashIQ.Models;
+using CashIQ.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
 
 namespace CashIQ.Controllers
 {
-	public class ExpenseController(IHttpClientFactory httpClientFactory) : Controller
+	public class ExpenseController(IHttpClientFactory httpClientFactory, ITransactionService transactionService) : Controller
 	{
 		private readonly HttpClient _httpClient = httpClientFactory.CreateClient("CashIQApi");
+		private readonly ITransactionService _transactionService = transactionService;
 		private const string apiExpensesRoute = "api/expenses";
-		public async Task<IActionResult> Index()
+
+		public async Task<IActionResult> Index(ExpenseViewModel viewModel)
 		{
-			var response = await _httpClient.GetAsync(apiExpensesRoute);
-
-			if (!response.IsSuccessStatusCode)
-				return View("Error");
-
-			var json = await response.Content.ReadAsStringAsync();
-			var expenses = JsonSerializer.Deserialize<IEnumerable<Expense>>(json, new JsonSerializerOptions
+			var expenses = await _transactionService.GetTransactionsViaApiAsync<Expense>();
+			if (expenses != null)
 			{
-				PropertyNameCaseInsensitive = true,
-			});
-
+				foreach (var item in expenses)
+				{
+					viewModel.TotalAmount += _transactionService.ConvertAmount(item.Amount, item.Frequency, viewModel.Frequency);
+				}
+				viewModel.TotalAmount = Math.Round(viewModel.TotalAmount, 2);
+				ViewData["viewModel"] = viewModel;
+			}
 			return View(expenses);
 		}
 

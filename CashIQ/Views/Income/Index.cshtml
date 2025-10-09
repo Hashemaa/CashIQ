@@ -1,11 +1,25 @@
-﻿@model IEnumerable<Income>
+﻿@using CashIQ.Enums
+@model IEnumerable<Income>
 @{
 	ViewBag.Title = "Incomes";
+	var viewModel = ViewData["viewModel"] as CashIQ.Models.IncomeViewModel;
 }
 
-@if (Model.Count() > 0)
+@if (Model.Count() > 0 && viewModel != null)
 {
 	<a asp-action="Create" asp-controller="Income">create an income</a>
+	<form asp-action="Index">
+		<label asp-for="@viewModel.Frequency">Frequency</label>
+		<br />
+		<select asp-for="@viewModel.Frequency" required>
+			@foreach (Frequency freq in Enum.GetValues(typeof(Frequency)))
+			{
+				<option value="@freq">@freq</option>
+			}
+		</select>
+		<button type="submit">submit</button>
+	</form>
+	<h1>Total Income: @ViewBag.viewModel.TotalAmount.ToString("C2")</h1>
 	<table style="width: 100%;">
 		<tr style="width: 100%; background: Lightgrey;">
 			<th>Title</th>

@@ -1,27 +1,29 @@
 ﻿using CashIQ.Models;
+using CashIQ.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
 
 namespace CashIQ.Controllers
 {
-	public class IncomeController(IHttpClientFactory httpClientFactory) : Controller
+	public class IncomeController(IHttpClientFactory httpClientFactory, ITransactionService transactionService) : Controller
 	{
 		private readonly HttpClient _httpClient = httpClientFactory.CreateClient("CashIQApi");
+		private readonly ITransactionService _transactionService = transactionService;
 		private const string apiIncomesRoute = "api/incomes";
 
-		public async Task<IActionResult> Index()
+		public async Task<IActionResult> Index(IncomeViewModel viewModel)
 		{
-			var response = await _httpClient.GetAsync(apiIncomesRoute);
-
-			if (!response.IsSuccessStatusCode)
-				return View("Error");
-
-			var json = await response.Content.ReadAsStringAsync();
-			var incomes = JsonSerializer.Deserialize<IEnumerable<Income>>(json, new JsonSerializerOptions {
-				PropertyNameCaseInsensitive = true,
-			});
-
+			var incomes = await _transactionService.GetTransactionsViaApiAsync<Income>();
+			if (incomes != null)
+			{
+				foreach (var item in incomes)
+				{
+					viewModel.TotalAmount += _transactionService.ConvertAmount(item.Amount, item.Frequency, viewModel.Frequency);
+				}
+				viewModel.TotalAmount = Math.Round(viewModel.TotalAmount, 2);
+				ViewData["viewModel"] = viewModel;
+			}
 			return View(incomes);
 		}
 
