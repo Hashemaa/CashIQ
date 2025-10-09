@@ -1,6 +1,6 @@
 ﻿namespace CashIQ.Dtos
 {
-	public class ExpenseReadDto : TransactionReadDto
+	public class ExpenseReadDto : ExpenseBaseDto
 	{
 	}
 }

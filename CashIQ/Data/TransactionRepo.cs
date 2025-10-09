@@ -1,4 +1,5 @@
 ﻿using CashIQ.Models.Abstracts;
+using Microsoft.EntityFrameworkCore;
 
 namespace CashIQ.Data
 {
@@ -22,7 +23,7 @@ namespace CashIQ.Data
 
 		public IQueryable<T> GetAllTransactions<T>() where T : Transaction
 		{
-			return _context.Set<T>();
+			return _context.Set<T>().AsNoTracking();
 		}
 
 		public T? GetTransactionById<T>(Guid id) where T : Transaction

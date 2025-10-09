@@ -2,7 +2,7 @@
 
 namespace CashIQ.Dtos
 {
-	public class IncomeReadDto : TransactionReadDto
+	public class IncomeReadDto : IncomeBaseDto
 	{
 	}
 }

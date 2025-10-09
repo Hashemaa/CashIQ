@@ -12,10 +12,7 @@ namespace CashIQ.Services
 		{
 			string apiRoute = $"api/{typeof(T).Name.ToLower()}s";
 			var response = await _httpClient.GetAsync(apiRoute);
-
-			if (!response.IsSuccessStatusCode)
-				return null; //throw an exception later
-
+			response.EnsureSuccessStatusCode();
 			var json = await response.Content.ReadAsStringAsync();
 			return JsonSerializer.Deserialize<IEnumerable<T>>(json, new JsonSerializerOptions
 			{

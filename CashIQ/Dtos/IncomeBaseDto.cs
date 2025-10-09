@@ -1,16 +1,13 @@
 ﻿using CashIQ.Enums;
-using System.ComponentModel.DataAnnotations;
 
 namespace CashIQ.Dtos
 {
-	public class TransactionUpdateDto
+	public class IncomeBaseDto
 	{
-		[Required]
+		public Guid Id { get; set; }
 		public string Title { get; set; } = string.Empty;
 		public string? Description { get; set; } = null;
-		[Required]
 		public decimal Amount { get; set; } = 0.00M;
-		[Required]
 		public Frequency Frequency { get; set; } = Frequency.Monthly;
 	}
 }

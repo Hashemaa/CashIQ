@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using CashIQ.Data;
+﻿using CashIQ.Data;
 using CashIQ.Dtos;
+using CashIQ.Helpers;
 using CashIQ.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +22,7 @@ namespace CashIQ.Controllers.Api
 
 			if (incomesFromRepo != null)
 			{
-				return Ok(_mapper.Map<IEnumerable<IncomeReadDto>>(incomesFromRepo));
+					return Ok(_mapper.Map(incomesFromRepo));
 			}
 
 			return NotFound(incomesFromRepo);
@@ -36,7 +36,7 @@ namespace CashIQ.Controllers.Api
 
 			if (incomeFromRepo != null)
 			{
-				return Ok(_mapper.Map<IncomeReadDto>(incomeFromRepo));
+				return Ok(_mapper.Map(incomeFromRepo));
 			}
 
 			return NotFound(incomeFromRepo);
@@ -46,11 +46,11 @@ namespace CashIQ.Controllers.Api
 		[HttpPost]
 		public ActionResult<IncomeReadDto> CreateIncome(IncomeCreateDto incomeCreateDto)
 		{
-			var income = _mapper.Map<Income>(incomeCreateDto);
+			var income = _mapper.Map(incomeCreateDto);
 			_transactionRepo.CreateTransaction<Income>(income);
 			_transactionRepo.SaveChanges();
 
-			var incomeReadDto = _mapper.Map<IncomeReadDto>(income);
+			var incomeReadDto = _mapper.Map(income);
 
 			return CreatedAtRoute(nameof(GetIncomeById), new { Id = incomeReadDto.Id }, incomeReadDto);
 		}
@@ -59,15 +59,14 @@ namespace CashIQ.Controllers.Api
 		[HttpPut("{id}")]
 		public ActionResult<IncomeReadDto> UpdateIncome(Guid id, IncomeUpdateDto incomeUpdateDto)
 		{
-			var incomesFromRepo = _transactionRepo.GetTransactionById<Income>(id);
+			var incomeFromRepo = _transactionRepo.GetTransactionById<Income>(id);
 
-			if (incomesFromRepo == null)
+			if (incomeFromRepo == null)
 			{
-				return NotFound(incomesFromRepo);
+				return NotFound(incomeFromRepo);
 			}
-
-			_mapper.Map(incomeUpdateDto, incomesFromRepo);
-			//_transactionRepo.UpdateTransaction(incomesFromRepo);
+			
+			_transactionRepo.UpdateTransaction(_mapper.Map(incomeUpdateDto, incomeFromRepo));
 			_transactionRepo.SaveChanges();
 
 			return NoContent();
@@ -76,22 +75,27 @@ namespace CashIQ.Controllers.Api
 
 		//PATCH api/incomes/{id}
 		[HttpPatch("{id}")]
-		public ActionResult<IncomeReadDto> PartialIncomeUpdate(Guid id, JsonPatchDocument<IncomeUpdateDto> incomeUpdateDto)
+		public ActionResult<IncomeReadDto> PartialIncomeUpdate(Guid id, JsonPatchDocument<IncomeUpdateDto> patchDoc)
 		{
 			var incomeFromRepo = _transactionRepo.GetTransactionById<Income>(id);
 
 			if (incomeFromRepo != null)
 			{
-				var incomeToPatch = _mapper.Map<IncomeUpdateDto>(incomeFromRepo);
-				incomeUpdateDto.ApplyTo(incomeToPatch, ModelState);
+				var incomeUpdateDto = new IncomeUpdateDto
+				{
+					Title = incomeFromRepo.Title,
+					Description = incomeFromRepo.Description,
+					Amount = incomeFromRepo.Amount,
+					Frequency = incomeFromRepo.Frequency,
+				};
+				patchDoc.ApplyTo(incomeUpdateDto, ModelState);
 
-				if (!TryValidateModel(incomeToPatch))
+				if (!TryValidateModel(incomeUpdateDto))
 				{
 					return ValidationProblem(ModelState);
 				}
-
-				_mapper.Map(incomeToPatch, incomeFromRepo);
-				//_transactionRepo.UpdateTransaction<Income>(incomeFromRepo);
+				
+				_transactionRepo.UpdateTransaction<Income>(_mapper.Map(incomeUpdateDto, incomeFromRepo));
 				_transactionRepo.SaveChanges();
 
 				return NoContent();

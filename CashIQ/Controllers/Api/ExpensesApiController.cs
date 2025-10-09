@@ -1,6 +1,6 @@
-﻿using AutoMapper;
-using CashIQ.Data;
+﻿using CashIQ.Data;
 using CashIQ.Dtos;
+using CashIQ.Helpers;
 using CashIQ.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +22,7 @@ namespace CashIQ.Controllers.Api
 
 			if (expensesFromRepo != null)
 			{
-				return Ok(_mapper.Map<IEnumerable<ExpenseReadDto>>(expensesFromRepo));
+				return Ok(_mapper.Map(expensesFromRepo));
 			}
 
 			return NotFound(expensesFromRepo);
@@ -36,7 +36,7 @@ namespace CashIQ.Controllers.Api
 
 			if (expenseFromRepo != null)
 			{
-				return Ok(_mapper.Map<ExpenseReadDto>(expenseFromRepo));
+				return Ok(_mapper.Map(expenseFromRepo));
 			}
 
 			return NotFound(expenseFromRepo);
@@ -46,11 +46,11 @@ namespace CashIQ.Controllers.Api
 		[HttpPost]
 		public ActionResult<ExpenseReadDto> CreateExpense(ExpenseCreateDto expenseCreateDto)
 		{
-			var expense = _mapper.Map<Expense>(expenseCreateDto);
+			var expense = _mapper.Map(expenseCreateDto);
 			_transactionRepo.CreateTransaction<Expense>(expense);
 			_transactionRepo.SaveChanges();
 
-			var expenseReadDto = _mapper.Map<ExpenseReadDto>(expense);
+			var expenseReadDto = _mapper.Map(expense);
 
 			return CreatedAtRoute(nameof(GetExpenseById), new { Id = expenseReadDto.Id }, expenseReadDto);
 		}
@@ -59,15 +59,14 @@ namespace CashIQ.Controllers.Api
 		[HttpPut("{id}")]
 		public ActionResult<ExpenseReadDto> UpdateExpense(Guid id, ExpenseUpdateDto expenseUpdateDto)
 		{
-			var expensesFromRepo = _transactionRepo.GetTransactionById<Expense>(id);
+			var expenseFromRepo = _transactionRepo.GetTransactionById<Expense>(id);
 
-			if (expensesFromRepo == null)
+			if (expenseFromRepo == null)
 			{
-				return NotFound(expensesFromRepo);
+				return NotFound(expenseFromRepo);
 			}
 
-			_mapper.Map(expenseUpdateDto, expensesFromRepo);
-			//_transactionRepo.UpdateTransaction(expensesFromRepo);
+			_transactionRepo.UpdateTransaction(_mapper.Map(expenseUpdateDto, expenseFromRepo));
 			_transactionRepo.SaveChanges();
 
 			return NoContent();
@@ -76,22 +75,27 @@ namespace CashIQ.Controllers.Api
 
 		//PATCH api/expenses/{id}
 		[HttpPatch("{id}")]
-		public ActionResult<ExpenseReadDto> PartialExpenseUpdate(Guid id, JsonPatchDocument<ExpenseUpdateDto> expenseUpdateDto)
+		public ActionResult<ExpenseReadDto> PartialExpenseUpdate(Guid id, JsonPatchDocument<ExpenseUpdateDto> patchDoc)
 		{
 			var expenseFromRepo = _transactionRepo.GetTransactionById<Expense>(id);
 
 			if (expenseFromRepo != null)
 			{
-				var expenseToPatch = _mapper.Map<ExpenseUpdateDto>(expenseFromRepo);
-				expenseUpdateDto.ApplyTo(expenseToPatch, ModelState);
+				var expenseUpdateDto = new ExpenseUpdateDto
+				{
+					Title = expenseFromRepo.Title,
+					Description = expenseFromRepo.Description,
+					Amount = expenseFromRepo.Amount,
+					Frequency = expenseFromRepo.Frequency,
+				};
+				patchDoc.ApplyTo(expenseUpdateDto, ModelState);
 
-				if (!TryValidateModel(expenseToPatch))
+				if (!TryValidateModel(expenseUpdateDto))
 				{
 					return ValidationProblem(ModelState);
 				}
 
-				_mapper.Map(expenseToPatch, expenseFromRepo);
-				//_transactionRepo.UpdateTransaction<Expense>(expenseFromRepo);
+				_transactionRepo.UpdateTransaction<Expense>(_mapper.Map(expenseUpdateDto, expenseFromRepo));
 				_transactionRepo.SaveChanges();
 
 				return NoContent();

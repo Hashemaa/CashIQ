@@ -1,4 +1,5 @@
 using CashIQ.Data;
+using CashIQ.Helpers;
 using CashIQ.Services;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,12 +11,12 @@ builder.Services.AddControllersWithViews().AddNewtonsoftJson(/*options => {
 }*/);
 builder.Services.AddDbContext<ApplicationDBContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnectionString")));
 builder.Services.AddScoped<ITransactionRepo, TransactionRepo>();
+builder.Services.AddTransient<IMapper, Mapper>();
 builder.Services.AddTransient<ITransactionService, TransactionService>();
 builder.Services.AddHttpClient("CashIQApi", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7242");
 });
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
